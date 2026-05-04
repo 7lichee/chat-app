@@ -54,6 +54,14 @@
       border: 1px solid #ececec;
     }
 
+    /* 日期分隔 */
+    .date {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin: 20px 0 10px;
+    }
+
     #inputArea {
       position: sticky;
       bottom: 0;
@@ -66,25 +74,19 @@
       backdrop-filter: blur(12px);
     }
 
-    /* ✅ 完全修复后的 textarea */
     textarea {
       flex: 1;
-
       font-size: 16px;
       line-height: 20px;
-
       padding: 8px 14px;
       height: 36px;
-
       border-radius: 20px;
       border: none;
       background: #ffffff;
       outline: none;
-
       resize: none;
       max-height: 120px;
       overflow-y: auto;
-
       box-sizing: border-box;
     }
 
@@ -117,7 +119,6 @@
   <div id="inputArea">
     <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
 
-    <!-- ✅ rows=1 很关键 -->
     <textarea id="text" rows="1" placeholder="写下一点此刻的想法..."></textarea>
 
     <button onclick="send()" class="send-btn">↑</button>
@@ -130,19 +131,46 @@
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
+/* 修复旧数据没有时间 */
+messages = messages.map(m => {
+  if (!m.time) {
+    m.time = new Date().toISOString();
+  }
+  return m;
+});
+
 const textarea = document.getElementById("text");
 
-/* ✅ 自动高度（稳定版） */
+/* 自动高度 */
 textarea.addEventListener("input", () => {
   textarea.style.height = "36px";
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
+/* 格式化日期 */
+function formatDate(dateStr) {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
 function render() {
   const chat = document.getElementById("chat");
   chat.innerHTML = "";
 
+  let lastDate = "";
+
   messages.forEach(m => {
+    const currentDate = formatDate(m.time);
+
+    /* 插入日期分隔 */
+    if (currentDate !== lastDate) {
+      const dateDiv = document.createElement("div");
+      dateDiv.className = "date";
+      dateDiv.innerText = currentDate;
+      chat.appendChild(dateDiv);
+      lastDate = currentDate;
+    }
+
     const div = document.createElement("div");
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
     div.innerText = m.text;
@@ -156,11 +184,16 @@ function send() {
   const input = textarea;
   if (!input.value.trim()) return;
 
-  messages.push({ role, text: input.value });
+  messages.push({
+    role,
+    text: input.value,
+    time: new Date().toISOString()
+  });
+
   localStorage.setItem("chat", JSON.stringify(messages));
 
   input.value = "";
-  input.style.height = "36px"; // ✅ 重置为一行
+  input.style.height = "36px";
   render();
 }
 
@@ -171,13 +204,41 @@ function switchRole() {
 }
 
 function exportTxt() {
-  const text = messages.map(m => `${m.role}: ${m.text}`).join("\n");
+  let start = prompt("开始日期 (2026-05-01)");
+  let end = prompt("结束日期 (2026-05-04)");
+  if (!start || !end) return;
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  endDate.setHours(23,59,59,999);
+
+  const filtered = messages.filter(m => {
+    const t = new Date(m.time);
+    return t >= startDate && t <= endDate;
+  });
+
+  let text = "";
+  let lastDate = "";
+
+  filtered.forEach(m => {
+    const d = formatDate(m.time);
+
+    if (d !== lastDate) {
+      text += `\n${d}\n`;
+      lastDate = d;
+    }
+
+    text += `${m.role}: ${m.text}\n`;
+  });
+
   const blob = new Blob([text], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
 
+  const fileName = `${start.replace(/-/g,'.')}-${end.replace(/-/g,'.')}.txt`;
+
   const a = document.createElement("a");
   a.href = url;
-  a.download = "chat.txt";
+  a.download = fileName;
   a.click();
 }
 
