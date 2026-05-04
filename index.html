@@ -32,7 +32,7 @@
     }
 
     .me1 {
-      background: #e8ede7;
+      background: #e6efe9;
       margin-left: auto;
     }
 
@@ -74,9 +74,10 @@
       cursor: pointer;
     }
 
-    /* ChatGPT风格发送按钮 */
+    /* 🌿 新发送按钮（青绿低饱和） */
     .send-btn {
-      background: #e0e0e0;
+      background: #dfeee7;
+      color: #4f7f6f;
       border-radius: 50%;
       width: 36px;
       height: 36px;
@@ -97,15 +98,15 @@
 <div id="chat"></div>
 
 <div id="inputArea">
-  <!-- 🍋‍🟩 / 🤍 切换 -->
+  <!-- 🍋‍🟩 / 🤍 -->
   <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
-
-  <!-- 发送按钮（左） -->
-  <button onclick="send()" class="send-btn">↑</button>
 
   <input id="text" placeholder="写下一点此刻的想法..." />
 
-  <!-- 导出（右） -->
+  <!-- ✅ 发送（移动到这里） -->
+  <button onclick="send()" class="send-btn">↑</button>
+
+  <!-- ☁️ 导出（最右） -->
   <button onclick="exportTxt()" class="icon-btn">☁️</button>
 </div>
 
