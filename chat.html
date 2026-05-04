@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>自我对话</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+    }
+    #chat {
+      padding: 10px;
+      height: 80vh;
+      overflow-y: auto;
+    }
+    .msg {
+      padding: 8px 12px;
+      margin: 6px;
+      border-radius: 10px;
+      max-width: 60%;
+    }
+    .me1 {
+      background: #d1e7ff;
+      margin-left: auto;
+    }
+    .me2 {
+      background: #e8e8e8;
+      margin-right: auto;
+    }
+    #inputArea {
+      display: flex;
+      padding: 10px;
+      background: white;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+    }
+    button {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+  <button onclick="switchRole()">当前：A</button>
+  <input id="text" placeholder="输入内容..." />
+  <button onclick="send()">发送</button>
+  <button onclick="exportTxt()">导出</button>
+</div>
+
+<script>
+let role = "A";
+let messages = JSON.parse(localStorage.getItem("chat") || "[]");
+
+function render() {
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+  messages.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "msg " + (m.role === "A" ? "me1" : "me2");
+    div.innerText = m.role + ": " + m.text;
+    chat.appendChild(div);
+  });
+}
+
+function send() {
+  const input = document.getElementById("text");
+  if (!input.value) return;
+
+  messages.push({ role, text: input.value });
+  localStorage.setItem("chat", JSON.stringify(messages));
+
+  input.value = "";
+  render();
+}
+
+function switchRole() {
+  role = role === "A" ? "B" : "A";
+  document.querySelector("button").innerText = "当前：" + role;
+}
+
+function exportTxt() {
+  const text = messages.map(m => `${m.role}: ${m.text}`).join("\n");
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "chat.txt";
+  a.click();
+}
+
+render();
+</script>
+
+</body>
+</html>
