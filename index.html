@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>自我对话</title>
 
-  <!-- ✅ 禁止缩放 -->
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
   <style>
@@ -12,20 +11,18 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* ✅ 防止整体滚动 */
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f7f6f3;
       color: #2c2c2c;
     }
 
-    /* 整体容器 */
     #app {
       height: 100%;
       display: flex;
       flex-direction: column;
     }
 
-    /* 聊天区域 */
     #chat {
       flex: 1;
       overflow-y: auto;
@@ -57,12 +54,11 @@
       border: 1px solid #ececec;
     }
 
-    /* 输入区 */
     #inputArea {
-      position: sticky; /* ✅ 替代 fixed，更稳定 */
+      position: sticky;
       bottom: 0;
       display: flex;
-      align-items: center;
+      align-items: flex-end;
       gap: 8px;
       padding: 10px;
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
@@ -70,14 +66,17 @@
       backdrop-filter: blur(12px);
     }
 
-    input {
+    textarea {
       flex: 1;
       padding: 12px 14px;
       border-radius: 20px;
       border: none;
       background: #ffffff;
-      font-size: 16px; /* ✅ 防止iOS自动放大 */
+      font-size: 16px;
       outline: none;
+      resize: none;
+      line-height: 1.5;
+      max-height: 120px;
     }
 
     .icon-btn {
@@ -109,7 +108,7 @@
   <div id="inputArea">
     <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
 
-    <input id="text" placeholder="写下一点此刻的想法..." />
+    <textarea id="text" placeholder="写下一点此刻的想法..."></textarea>
 
     <button onclick="send()" class="send-btn">↑</button>
 
@@ -120,6 +119,13 @@
 <script>
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
+
+const textarea = document.getElementById("text");
+
+textarea.addEventListener("input", () => {
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+});
 
 function render() {
   const chat = document.getElementById("chat");
@@ -136,13 +142,14 @@ function render() {
 }
 
 function send() {
-  const input = document.getElementById("text");
+  const input = textarea;
   if (!input.value.trim()) return;
 
   messages.push({ role, text: input.value });
   localStorage.setItem("chat", JSON.stringify(messages));
 
   input.value = "";
+  input.style.height = "auto"; // 重置高度
   render();
 }
 
