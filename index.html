@@ -76,7 +76,10 @@
       outline: none;
       resize: none;
       line-height: 1.5;
+
+      height: 44px;          /* ✅ 初始一行高度 */
       max-height: 120px;
+      overflow-y: auto;
     }
 
     .icon-btn {
@@ -122,8 +125,9 @@ let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
 const textarea = document.getElementById("text");
 
+/* ✅ 自动高度（保持一行起步） */
 textarea.addEventListener("input", () => {
-  textarea.style.height = "auto";
+  textarea.style.height = "44px";
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
@@ -149,7 +153,7 @@ function send() {
   localStorage.setItem("chat", JSON.stringify(messages));
 
   input.value = "";
-  input.style.height = "auto"; // 重置高度
+  input.style.height = "44px"; // ✅ 发送后恢复一行高度
   render();
 }
 
