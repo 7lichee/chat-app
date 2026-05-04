@@ -1,130 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>水仙</title>
+<meta charset="UTF-8">
+<title>水仙</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f7f6f3;
+}
 
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+#app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f7f6f3;
-    }
+/* 聊天 */
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 14px;
+  padding-bottom: 140px;
+  box-sizing: border-box;
+}
 
-    #app {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
+.msg {
+  display: block;
+  width: fit-content;
+  padding: 12px 16px;
+  margin: 10px 0;
+  border-radius: 16px;
+  max-width: 78%;
+  line-height: 1.6;
+  word-break: break-word;
+  font-size: 15px;
+}
 
-    /* ===== 聊天区 ===== */
-    #chat {
-      flex: 1;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      padding: 20px 14px;
-      box-sizing: border-box;
-      padding-bottom: 140px;
-    }
+.me1 { background: #e6efe9; margin-left: auto; }
+.me2 { background: #fff; margin-right: auto; border: 1px solid #ececec; }
 
-    .msg {
-      display: block;
-      width: fit-content;
-      padding: 12px 16px;
-      margin: 10px 0;
-      border-radius: 16px;
-      max-width: 78%;
-      line-height: 1.6;
-      word-break: break-word;
-      font-size: 15px;
-    }
+/* 日期 */
+.date-wrapper { text-align: center; }
 
-    .me1 { background: #e6efe9; margin-left: auto; }
-    .me2 { background: #fff; margin-right: auto; border: 1px solid #ececec; }
+.date-badge {
+  display: inline-block;
+  background: #e5e5e5;
+  color: #666;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  margin: 20px auto 10px;
+}
 
-    /* ===== 日期 ===== */
-    .date-wrapper {
-      text-align: center;
-    }
+/* 输入栏 */
+#inputArea {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
 
-    .date-badge {
-      display: inline-block;
-      background: #e5e5e5;
-      color: #666;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      margin: 20px auto 10px;
-    }
+  display: flex;
+  align-items: center;
+  gap: 8px;
 
-    /* ===== 输入栏（关键优化） ===== */
-    #inputArea {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+  padding: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 
-      display: flex;
-      align-items: center;
-      gap: 8px;
+  background: rgba(247,246,243,0.92);
+  backdrop-filter: blur(12px);
+}
 
-      padding: 10px;
-      padding-bottom: calc(10px + env(safe-area-inset-bottom));
+/* ⭐ 一行输入 */
+textarea {
+  flex: 1;
+  font-size: 16px;
+  line-height: 36px;
 
-      background: rgba(247,246,243,0.92);
-      backdrop-filter: blur(12px);
+  height: 36px;
+  padding: 0 14px;
 
-      transform: translateY(0);
-      transition: transform 0.2s ease;
-    }
+  border-radius: 20px;
+  border: none;
+  outline: none;
 
-    /* ⭐ 单行输入框 */
-    textarea {
-      flex: 1;
-      font-size: 16px;
-      line-height: 36px;
+  resize: none;
+  overflow: hidden;
+  white-space: nowrap;
+}
 
-      height: 36px;
-      padding: 0 14px;
+.icon-btn {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  padding: 6px;
+}
 
-      border-radius: 20px;
-      border: none;
-      outline: none;
-
-      resize: none;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    .icon-btn {
-      border: none;
-      background: transparent;
-      font-size: 20px;
-      padding: 6px;
-    }
-
-    .send-btn {
-      background: #dfeee7;
-      color: #4f7f6f;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
-  </style>
+.send-btn {
+  background: #dfeee7;
+  color: #4f7f6f;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+</style>
 </head>
 
 <body>
@@ -133,16 +123,13 @@
   <div id="chat"></div>
 
   <div id="inputArea">
-    <button onclick="switchRole()" class="icon-btn"
-      onmousedown="event.preventDefault()">🍋‍🟩</button>
+    <button id="roleBtn" class="icon-btn" onmousedown="event.preventDefault()">🍋‍🟩</button>
 
     <textarea id="text" placeholder="写下一点此刻的想法..."></textarea>
 
-    <button class="send-btn"
-      onmousedown="event.preventDefault()"
-      onclick="send()">↑</button>
+    <button class="send-btn" onmousedown="event.preventDefault()">↑</button>
 
-    <button onclick="exportTxt()" class="icon-btn">☁️</button>
+    <button class="icon-btn">☁️</button>
   </div>
 </div>
 
@@ -152,24 +139,7 @@ let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
 const textarea = document.getElementById("text");
 const chat = document.getElementById("chat");
-const inputArea = document.getElementById("inputArea");
-
-/* ===== iOS 键盘适配 ===== */
-if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", () => {
-    const offset = window.innerHeight - window.visualViewport.height;
-    inputArea.style.transform = offset > 100
-      ? `translateY(-${offset}px)`
-      : "translateY(0)";
-    scrollToBottom();
-  });
-}
-
-/* 防止页面滚动抖动 */
-document.body.addEventListener('touchmove', e => {
-  if (e.target.closest('#chat')) return;
-  e.preventDefault();
-}, { passive: false });
+const roleBtn = document.getElementById("roleBtn");
 
 /* ===== 日期 ===== */
 function formatDate(d) {
@@ -198,31 +168,19 @@ function render() {
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
     div.innerText = m.text;
 
-    /* 长按删除 */
-    let timer;
-    div.addEventListener("touchstart", () => {
-      timer = setTimeout(() => {
-        if (confirm("删除这条消息？")) {
-          messages.splice(index, 1);
-          localStorage.setItem("chat", JSON.stringify(messages));
-          render();
-        }
-      }, 500);
-    });
-
-    div.addEventListener("touchend", () => clearTimeout(timer));
-    div.addEventListener("touchmove", () => clearTimeout(timer));
-
     chat.appendChild(div);
   });
 
   scrollToBottom();
 }
 
-/* ===== 滚动 ===== */
+/* ===== ⭐ 修复滚动（关键） ===== */
 function scrollToBottom() {
   requestAnimationFrame(() => {
-    chat.scrollTop = chat.scrollHeight;
+    chat.scrollTo({
+      top: chat.scrollHeight,
+      behavior: "smooth"
+    });
   });
 }
 
@@ -244,47 +202,14 @@ function send() {
   setTimeout(() => textarea.focus(), 0);
 }
 
-/* ===== 切换角色 ===== */
-function switchRole() {
+/* ===== ⭐ 修复：角色切换 ===== */
+roleBtn.addEventListener("click", () => {
   role = role === "A" ? "B" : "A";
-  document.getElementById("roleBtn").innerText = role === "A" ? "🍋‍🟩" : "🤍";
-}
+  roleBtn.innerText = role === "A" ? "🍋‍🟩" : "🤍";
+});
 
-/* ===== 导出 ===== */
-function exportTxt() {
-  let start = prompt("开始日期 (2026-05-01)");
-  let end = prompt("结束日期 (2026-05-04)");
-  if (!start || !end) return;
-
-  const s = new Date(start);
-  const e = new Date(end);
-  e.setHours(23,59,59,999);
-
-  const filtered = messages.filter(m => {
-    const t = new Date(m.time);
-    return t >= s && t <= e;
-  });
-
-  let text = "";
-  let last = "";
-
-  filtered.forEach(m => {
-    const d = formatDate(m.time);
-    if (d !== last) {
-      text += `\n${d}\n`;
-      last = d;
-    }
-    text += `${m.role}: ${m.text}\n`;
-  });
-
-  const blob = new Blob([text], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `${start}-${end}.txt`;
-  a.click();
-}
+/* 发送按钮绑定 */
+document.querySelector(".send-btn").addEventListener("click", send);
 
 render();
 </script>
