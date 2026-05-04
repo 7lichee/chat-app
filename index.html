@@ -54,12 +54,20 @@
       border: 1px solid #ececec;
     }
 
-    /* 日期分隔 */
-    .date {
-      text-align: center;
+    /* ✅ 微信风日期标签 */
+    .date-badge {
+      display: inline-block;
+      background: #e5e5e5;
+      color: #666;
       font-size: 12px;
-      color: #888;
-      margin: 20px 0 10px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin: 20px auto 10px;
+      text-align: center;
+    }
+
+    .date-wrapper {
+      text-align: center;
     }
 
     #inputArea {
@@ -131,23 +139,20 @@
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
-/* 修复旧数据没有时间 */
+/* 修复旧数据 */
 messages = messages.map(m => {
-  if (!m.time) {
-    m.time = new Date().toISOString();
-  }
+  if (!m.time) m.time = new Date().toISOString();
   return m;
 });
 
 const textarea = document.getElementById("text");
 
-/* 自动高度 */
 textarea.addEventListener("input", () => {
   textarea.style.height = "36px";
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
-/* 格式化日期 */
+/* 日期格式 */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
@@ -162,12 +167,18 @@ function render() {
   messages.forEach(m => {
     const currentDate = formatDate(m.time);
 
-    /* 插入日期分隔 */
+    /* ✅ 插入微信风日期标签 */
     if (currentDate !== lastDate) {
-      const dateDiv = document.createElement("div");
-      dateDiv.className = "date";
-      dateDiv.innerText = currentDate;
-      chat.appendChild(dateDiv);
+      const wrapper = document.createElement("div");
+      wrapper.className = "date-wrapper";
+
+      const badge = document.createElement("div");
+      badge.className = "date-badge";
+      badge.innerText = currentDate;
+
+      wrapper.appendChild(badge);
+      chat.appendChild(wrapper);
+
       lastDate = currentDate;
     }
 
