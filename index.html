@@ -2,27 +2,23 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <title>自我对话</title>
+  <title>水仙</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <!-- iPhone 图标 -->
   <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 
-  <!-- App 模式 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="自我对话">
 
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
+      overflow: hidden; /* ❗防止页面滚动抖动 */
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f7f6f3;
-      color: #2c2c2c;
     }
 
     #app {
@@ -31,12 +27,14 @@
       flex-direction: column;
     }
 
+    /* ===== 聊天区域 ===== */
     #chat {
       flex: 1;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 20px 14px;
-      padding-bottom: 120px;
       box-sizing: border-box;
+      padding-bottom: 140px; /* 给输入框留空间 */
     }
 
     .msg {
@@ -51,42 +49,28 @@
       font-size: 15px;
     }
 
-    .me1 {
-      background: #e6efe9;
-      margin-left: auto;
-    }
+    .me1 { background: #e6efe9; margin-left: auto; }
+    .me2 { background: #fff; margin-right: auto; border: 1px solid #ececec; }
 
-    .me2 {
-      background: #ffffff;
-      margin-right: auto;
-      border: 1px solid #ececec;
-    }
-
-    .date-badge {
-      display: inline-block;
-      background: #e5e5e5;
-      color: #666;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      margin: 20px auto 10px;
-      text-align: center;
-    }
-
-    .date-wrapper {
-      text-align: center;
-    }
-
+    /* ===== 输入栏（核心优化） ===== */
     #inputArea {
-      position: sticky;
+      position: fixed;
+      left: 0;
+      right: 0;
       bottom: 0;
+
       display: flex;
       align-items: flex-end;
       gap: 8px;
+
       padding: 10px;
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
-      background: rgba(247,246,243,0.9);
+
+      background: rgba(247,246,243,0.92);
       backdrop-filter: blur(12px);
+
+      transform: translateY(0);
+      transition: transform 0.2s ease;
     }
 
     textarea {
@@ -94,15 +78,16 @@
       font-size: 16px;
       line-height: 20px;
       padding: 8px 14px;
-      height: 36px;
+
+      min-height: 36px;
+      max-height: 120px;
+
       border-radius: 20px;
       border: none;
-      background: #ffffff;
       outline: none;
+
       resize: none;
-      max-height: 120px;
       overflow-y: auto;
-      box-sizing: border-box;
     }
 
     .icon-btn {
@@ -123,6 +108,20 @@
       justify-content: center;
       font-size: 16px;
     }
+
+    .date-wrapper {
+      text-align: center;
+    }
+
+    .date-badge {
+      display: inline-block;
+      background: #e5e5e5;
+      color: #666;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin: 20px auto 10px;
+    }
   </style>
 </head>
 
@@ -132,11 +131,14 @@
   <div id="chat"></div>
 
   <div id="inputArea">
-    <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
+    <button onclick="switchRole()" class="icon-btn" id="roleBtn"
+      onmousedown="event.preventDefault()">🍋‍🟩</button>
 
-    <textarea id="text" rows="1" placeholder="写下一点此刻的想法..."></textarea>
+    <textarea id="text" placeholder="写下一点此刻的想法..."></textarea>
 
-    <button onclick="send()" class="send-btn">↑</button>
+    <button class="send-btn"
+      onmousedown="event.preventDefault()"
+      onclick="send()">↑</button>
 
     <button onclick="exportTxt()" class="icon-btn">☁️</button>
   </div>
@@ -146,13 +148,29 @@
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
-/* 修复旧数据 */
-messages = messages.map(m => {
-  if (!m.time) m.time = new Date().toISOString();
-  return m;
-});
-
 const textarea = document.getElementById("text");
+const chat = document.getElementById("chat");
+const inputArea = document.getElementById("inputArea");
+
+/* ===== iOS 键盘适配核心 ===== */
+let keyboardHeight = 0;
+
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", () => {
+    const vh = window.innerHeight - window.visualViewport.height;
+
+    keyboardHeight = vh > 100 ? vh : 0;
+
+    inputArea.style.transform = `translateY(-${keyboardHeight}px)`;
+    scrollToBottom();
+  });
+}
+
+/* 防止滚动抖动 */
+document.body.addEventListener('touchmove', e => {
+  if (e.target.closest('#chat')) return;
+  e.preventDefault();
+}, { passive: false });
 
 /* 自动高度 */
 textarea.addEventListener("input", () => {
@@ -160,44 +178,36 @@ textarea.addEventListener("input", () => {
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
-/* 日期格式 */
-function formatDate(dateStr) {
-  const d = new Date(dateStr);
-  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+/* ===== 渲染 ===== */
+function formatDate(d) {
+  const t = new Date(d);
+  return `${t.getFullYear()}.${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}`;
 }
 
 function render() {
-  const chat = document.getElementById("chat");
   chat.innerHTML = "";
 
   let lastDate = "";
 
   messages.forEach((m, index) => {
-    const currentDate = formatDate(m.time);
+    const d = formatDate(m.time);
 
-    if (currentDate !== lastDate) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "date-wrapper";
-
-      const badge = document.createElement("div");
-      badge.className = "date-badge";
-      badge.innerText = currentDate;
-
-      wrapper.appendChild(badge);
-      chat.appendChild(wrapper);
-
-      lastDate = currentDate;
+    if (d !== lastDate) {
+      const wrap = document.createElement("div");
+      wrap.className = "date-wrapper";
+      wrap.innerHTML = `<div class="date-badge">${d}</div>`;
+      chat.appendChild(wrap);
+      lastDate = d;
     }
 
     const div = document.createElement("div");
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
     div.innerText = m.text;
 
-    /* ✅ 长按删除 */
-    let pressTimer;
+    let timer;
 
     div.addEventListener("touchstart", () => {
-      pressTimer = setTimeout(() => {
+      timer = setTimeout(() => {
         if (confirm("删除这条消息？")) {
           messages.splice(index, 1);
           localStorage.setItem("chat", JSON.stringify(messages));
@@ -206,79 +216,82 @@ function render() {
       }, 500);
     });
 
-    div.addEventListener("touchend", () => {
-      clearTimeout(pressTimer);
-    });
-
-    div.addEventListener("touchmove", () => {
-      clearTimeout(pressTimer);
-    });
+    div.addEventListener("touchend", () => clearTimeout(timer));
+    div.addEventListener("touchmove", () => clearTimeout(timer));
 
     chat.appendChild(div);
   });
 
-  chat.scrollTop = chat.scrollHeight;
+  scrollToBottom();
 }
 
+/* ===== 平滑滚动（防跳） ===== */
+function scrollToBottom() {
+  requestAnimationFrame(() => {
+    chat.scrollTop = chat.scrollHeight;
+  });
+}
+
+/* ===== 发送 ===== */
 function send() {
-  const input = textarea;
-  if (!input.value.trim()) return;
+  if (!textarea.value.trim()) return;
 
   messages.push({
     role,
-    text: input.value,
+    text: textarea.value,
     time: new Date().toISOString()
   });
 
   localStorage.setItem("chat", JSON.stringify(messages));
 
-  input.value = "";
-  input.style.height = "36px";
+  textarea.value = "";
+  textarea.style.height = "36px";
+
   render();
+
+  // ⭐ 保持键盘
+  setTimeout(() => textarea.focus(), 0);
 }
 
+/* ===== 切换角色 ===== */
 function switchRole() {
   role = role === "A" ? "B" : "A";
-  document.getElementById("roleBtn").innerText =
-    role === "A" ? "🍋‍🟩" : "🤍";
+  document.getElementById("roleBtn").innerText = role === "A" ? "🍋‍🟩" : "🤍";
 }
 
+/* ===== 导出 ===== */
 function exportTxt() {
   let start = prompt("开始日期 (2026-05-01)");
   let end = prompt("结束日期 (2026-05-04)");
   if (!start || !end) return;
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  endDate.setHours(23,59,59,999);
+  const s = new Date(start);
+  const e = new Date(end);
+  e.setHours(23,59,59,999);
 
   const filtered = messages.filter(m => {
     const t = new Date(m.time);
-    return t >= startDate && t <= endDate;
+    return t >= s && t <= e;
   });
 
   let text = "";
-  let lastDate = "";
+  let last = "";
 
   filtered.forEach(m => {
     const d = formatDate(m.time);
-
-    if (d !== lastDate) {
+    if (d !== last) {
       text += `\n${d}\n`;
-      lastDate = d;
+      last = d;
     }
-
     text += `${m.role}: ${m.text}\n`;
   });
 
   const blob = new Blob([text], { type: "text/plain" });
   const url = URL.createObjectURL(blob);
 
-  const fileName = `${start.replace(/-/g,'.')}-${end.replace(/-/g,'.')}.txt`;
-
   const a = document.createElement("a");
   a.href = url;
-  a.download = fileName;
+  a.download = `${start}-${end}.txt`;
   a.click();
 }
 
