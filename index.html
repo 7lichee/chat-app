@@ -6,6 +6,14 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
+  <!-- ✅ iPhone 主屏幕图标 -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+
+  <!-- ✅ 让网页像 App 一样运行 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="自我对话">
+
   <style>
     html, body {
       margin: 0;
@@ -54,7 +62,6 @@
       border: 1px solid #ececec;
     }
 
-    /* ✅ 微信风日期标签 */
     .date-badge {
       display: inline-block;
       background: #e5e5e5;
@@ -139,7 +146,6 @@
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
-/* 修复旧数据 */
 messages = messages.map(m => {
   if (!m.time) m.time = new Date().toISOString();
   return m;
@@ -152,7 +158,6 @@ textarea.addEventListener("input", () => {
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
-/* 日期格式 */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
@@ -167,7 +172,6 @@ function render() {
   messages.forEach(m => {
     const currentDate = formatDate(m.time);
 
-    /* ✅ 插入微信风日期标签 */
     if (currentDate !== lastDate) {
       const wrapper = document.createElement("div");
       wrapper.className = "date-wrapper";
