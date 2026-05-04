@@ -16,7 +16,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden; /* ❗防止页面滚动抖动 */
+      overflow: hidden;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f7f6f3;
     }
@@ -27,14 +27,14 @@
       flex-direction: column;
     }
 
-    /* ===== 聊天区域 ===== */
+    /* ===== 聊天区 ===== */
     #chat {
       flex: 1;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       padding: 20px 14px;
       box-sizing: border-box;
-      padding-bottom: 140px; /* 给输入框留空间 */
+      padding-bottom: 140px;
     }
 
     .msg {
@@ -52,7 +52,22 @@
     .me1 { background: #e6efe9; margin-left: auto; }
     .me2 { background: #fff; margin-right: auto; border: 1px solid #ececec; }
 
-    /* ===== 输入栏（核心优化） ===== */
+    /* ===== 日期 ===== */
+    .date-wrapper {
+      text-align: center;
+    }
+
+    .date-badge {
+      display: inline-block;
+      background: #e5e5e5;
+      color: #666;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      margin: 20px auto 10px;
+    }
+
+    /* ===== 输入栏（关键优化） ===== */
     #inputArea {
       position: fixed;
       left: 0;
@@ -60,7 +75,7 @@
       bottom: 0;
 
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       gap: 8px;
 
       padding: 10px;
@@ -73,21 +88,22 @@
       transition: transform 0.2s ease;
     }
 
+    /* ⭐ 单行输入框 */
     textarea {
       flex: 1;
       font-size: 16px;
-      line-height: 20px;
-      padding: 8px 14px;
+      line-height: 36px;
 
-      min-height: 36px;
-      max-height: 120px;
+      height: 36px;
+      padding: 0 14px;
 
       border-radius: 20px;
       border: none;
       outline: none;
 
       resize: none;
-      overflow-y: auto;
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     .icon-btn {
@@ -108,20 +124,6 @@
       justify-content: center;
       font-size: 16px;
     }
-
-    .date-wrapper {
-      text-align: center;
-    }
-
-    .date-badge {
-      display: inline-block;
-      background: #e5e5e5;
-      color: #666;
-      font-size: 12px;
-      padding: 4px 10px;
-      border-radius: 12px;
-      margin: 20px auto 10px;
-    }
   </style>
 </head>
 
@@ -131,7 +133,7 @@
   <div id="chat"></div>
 
   <div id="inputArea">
-    <button onclick="switchRole()" class="icon-btn" id="roleBtn"
+    <button onclick="switchRole()" class="icon-btn"
       onmousedown="event.preventDefault()">🍋‍🟩</button>
 
     <textarea id="text" placeholder="写下一点此刻的想法..."></textarea>
@@ -152,38 +154,30 @@ const textarea = document.getElementById("text");
 const chat = document.getElementById("chat");
 const inputArea = document.getElementById("inputArea");
 
-/* ===== iOS 键盘适配核心 ===== */
-let keyboardHeight = 0;
-
+/* ===== iOS 键盘适配 ===== */
 if (window.visualViewport) {
   window.visualViewport.addEventListener("resize", () => {
-    const vh = window.innerHeight - window.visualViewport.height;
-
-    keyboardHeight = vh > 100 ? vh : 0;
-
-    inputArea.style.transform = `translateY(-${keyboardHeight}px)`;
+    const offset = window.innerHeight - window.visualViewport.height;
+    inputArea.style.transform = offset > 100
+      ? `translateY(-${offset}px)`
+      : "translateY(0)";
     scrollToBottom();
   });
 }
 
-/* 防止滚动抖动 */
+/* 防止页面滚动抖动 */
 document.body.addEventListener('touchmove', e => {
   if (e.target.closest('#chat')) return;
   e.preventDefault();
 }, { passive: false });
 
-/* 自动高度 */
-textarea.addEventListener("input", () => {
-  textarea.style.height = "36px";
-  textarea.style.height = textarea.scrollHeight + "px";
-});
-
-/* ===== 渲染 ===== */
+/* ===== 日期 ===== */
 function formatDate(d) {
   const t = new Date(d);
-  return `${t.getFullYear()}.${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}`;
+  return `${t.getFullYear()}/${String(t.getMonth()+1).padStart(2,'0')}/${String(t.getDate()).padStart(2,'0')}`;
 }
 
+/* ===== 渲染 ===== */
 function render() {
   chat.innerHTML = "";
 
@@ -204,8 +198,8 @@ function render() {
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
     div.innerText = m.text;
 
+    /* 长按删除 */
     let timer;
-
     div.addEventListener("touchstart", () => {
       timer = setTimeout(() => {
         if (confirm("删除这条消息？")) {
@@ -225,7 +219,7 @@ function render() {
   scrollToBottom();
 }
 
-/* ===== 平滑滚动（防跳） ===== */
+/* ===== 滚动 ===== */
 function scrollToBottom() {
   requestAnimationFrame(() => {
     chat.scrollTop = chat.scrollHeight;
@@ -245,11 +239,8 @@ function send() {
   localStorage.setItem("chat", JSON.stringify(messages));
 
   textarea.value = "";
-  textarea.style.height = "36px";
-
   render();
 
-  // ⭐ 保持键盘
   setTimeout(() => textarea.focus(), 0);
 }
 
