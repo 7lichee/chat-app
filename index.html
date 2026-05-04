@@ -4,26 +4,39 @@
   <meta charset="UTF-8">
   <title>自我对话</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- ✅ 禁止缩放 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden; /* ✅ 防止整体滚动 */
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f7f6f3;
       color: #2c2c2c;
     }
 
+    /* 整体容器 */
+    #app {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 聊天区域 */
     #chat {
-      height: 100vh;
+      flex: 1;
       overflow-y: auto;
       padding: 20px 14px;
-      padding-bottom: 120px; /* ✅ 关键：给底部留空间 */
+      padding-bottom: 120px;
       box-sizing: border-box;
     }
 
     .msg {
-      display: inline-block; /* ✅ 关键：宽度随内容变化 */
+      display: block;
+      width: fit-content;
       padding: 12px 16px;
       margin: 10px 0;
       border-radius: 16px;
@@ -36,22 +49,18 @@
     .me1 {
       background: #e6efe9;
       margin-left: auto;
-      display: block;
-      width: fit-content;
     }
 
     .me2 {
       background: #ffffff;
       margin-right: auto;
       border: 1px solid #ececec;
-      display: block;
-      width: fit-content;
     }
 
+    /* 输入区 */
     #inputArea {
-      position: fixed;
+      position: sticky; /* ✅ 替代 fixed，更稳定 */
       bottom: 0;
-      width: 100%;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -59,7 +68,6 @@
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
       background: rgba(247,246,243,0.9);
       backdrop-filter: blur(12px);
-      box-sizing: border-box;
     }
 
     input {
@@ -68,7 +76,7 @@
       border-radius: 20px;
       border: none;
       background: #ffffff;
-      font-size: 15px;
+      font-size: 16px; /* ✅ 防止iOS自动放大 */
       outline: none;
     }
 
@@ -77,7 +85,6 @@
       background: transparent;
       font-size: 20px;
       padding: 6px;
-      cursor: pointer;
     }
 
     .send-btn {
@@ -91,25 +98,23 @@
       justify-content: center;
       font-size: 16px;
     }
-
-    #roleBtn {
-      font-size: 20px;
-    }
   </style>
 </head>
 
 <body>
 
-<div id="chat"></div>
+<div id="app">
+  <div id="chat"></div>
 
-<div id="inputArea">
-  <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
+  <div id="inputArea">
+    <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
 
-  <input id="text" placeholder="写下一点此刻的想法..." />
+    <input id="text" placeholder="写下一点此刻的想法..." />
 
-  <button onclick="send()" class="send-btn">↑</button>
+    <button onclick="send()" class="send-btn">↑</button>
 
-  <button onclick="exportTxt()" class="icon-btn">☁️</button>
+    <button onclick="exportTxt()" class="icon-btn">☁️</button>
+  </div>
 </div>
 
 <script>
