@@ -6,10 +6,10 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 
-  <!-- ✅ iPhone 主屏幕图标 -->
+  <!-- iPhone 图标 -->
   <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 
-  <!-- ✅ 让网页像 App 一样运行 -->
+  <!-- App 模式 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="自我对话">
@@ -146,6 +146,7 @@
 let role = "A";
 let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
+/* 修复旧数据 */
 messages = messages.map(m => {
   if (!m.time) m.time = new Date().toISOString();
   return m;
@@ -153,11 +154,13 @@ messages = messages.map(m => {
 
 const textarea = document.getElementById("text");
 
+/* 自动高度 */
 textarea.addEventListener("input", () => {
   textarea.style.height = "36px";
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
+/* 日期格式 */
 function formatDate(dateStr) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
@@ -169,7 +172,7 @@ function render() {
 
   let lastDate = "";
 
-  messages.forEach(m => {
+  messages.forEach((m, index) => {
     const currentDate = formatDate(m.time);
 
     if (currentDate !== lastDate) {
@@ -189,6 +192,28 @@ function render() {
     const div = document.createElement("div");
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
     div.innerText = m.text;
+
+    /* ✅ 长按删除 */
+    let pressTimer;
+
+    div.addEventListener("touchstart", () => {
+      pressTimer = setTimeout(() => {
+        if (confirm("删除这条消息？")) {
+          messages.splice(index, 1);
+          localStorage.setItem("chat", JSON.stringify(messages));
+          render();
+        }
+      }, 500);
+    });
+
+    div.addEventListener("touchend", () => {
+      clearTimeout(pressTimer);
+    });
+
+    div.addEventListener("touchmove", () => {
+      clearTimeout(pressTimer);
+    });
+
     chat.appendChild(div);
   });
 
