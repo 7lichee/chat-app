@@ -66,15 +66,15 @@
       backdrop-filter: blur(12px);
     }
 
-    /* ✅ 关键：真正一行高度版本 */
+    /* ✅ 完全修复后的 textarea */
     textarea {
       flex: 1;
 
       font-size: 16px;
       line-height: 20px;
 
-      padding: 10px 14px;
-      height: 40px;
+      padding: 8px 14px;
+      height: 36px;
 
       border-radius: 20px;
       border: none;
@@ -84,6 +84,8 @@
       resize: none;
       max-height: 120px;
       overflow-y: auto;
+
+      box-sizing: border-box;
     }
 
     .icon-btn {
@@ -115,7 +117,8 @@
   <div id="inputArea">
     <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋‍🟩</button>
 
-    <textarea id="text" placeholder="写下一点此刻的想法..."></textarea>
+    <!-- ✅ rows=1 很关键 -->
+    <textarea id="text" rows="1" placeholder="写下一点此刻的想法..."></textarea>
 
     <button onclick="send()" class="send-btn">↑</button>
 
@@ -129,9 +132,9 @@ let messages = JSON.parse(localStorage.getItem("chat") || "[]");
 
 const textarea = document.getElementById("text");
 
-/* ✅ 自动高度（严格一行起步） */
+/* ✅ 自动高度（稳定版） */
 textarea.addEventListener("input", () => {
-  textarea.style.height = "40px";
+  textarea.style.height = "36px";
   textarea.style.height = textarea.scrollHeight + "px";
 });
 
@@ -157,7 +160,7 @@ function send() {
   localStorage.setItem("chat", JSON.stringify(messages));
 
   input.value = "";
-  input.style.height = "40px"; // ✅ 恢复一行
+  input.style.height = "36px"; // ✅ 重置为一行
   render();
 }
 
