@@ -14,7 +14,6 @@
       color: #2c2c2c;
     }
 
-    /* 聊天区域 */
     #chat {
       height: calc(100vh - 80px);
       overflow-y: auto;
@@ -22,7 +21,6 @@
       box-sizing: border-box;
     }
 
-    /* 气泡基础 */
     .msg {
       padding: 12px 16px;
       margin: 10px 0;
@@ -33,27 +31,26 @@
       font-size: 15px;
     }
 
-    /* A（偏理性） */
+    /* 🍋 A */
     .me1 {
       background: #e8ede7;
       margin-left: auto;
     }
 
-    /* B（偏情绪） */
+    /* 🤍 B */
     .me2 {
       background: #ffffff;
       margin-right: auto;
       border: 1px solid #ececec;
     }
 
-    /* 底部输入区 */
     #inputArea {
       position: fixed;
       bottom: 0;
       width: 100%;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       padding: 10px;
       padding-bottom: calc(10px + env(safe-area-inset-bottom));
       background: rgba(247,246,243,0.9);
@@ -71,18 +68,18 @@
       outline: none;
     }
 
-    button {
+    /* 图标按钮 */
+    .icon-btn {
       border: none;
-      border-radius: 14px;
-      padding: 8px 12px;
-      background: #dcdcdc;
-      color: #333;
-      font-size: 14px;
+      background: transparent;
+      font-size: 20px;
+      padding: 6px;
+      cursor: pointer;
     }
 
-    /* 当前角色按钮强调 */
+    /* 当前角色（轻微强调） */
     #roleBtn {
-      background: #cfd8cc;
+      font-size: 20px;
     }
   </style>
 </head>
@@ -92,10 +89,16 @@
 <div id="chat"></div>
 
 <div id="inputArea">
-  <button onclick="switchRole()" id="roleBtn">理性</button>
+  <!-- 角色切换 -->
+  <button onclick="switchRole()" id="roleBtn" class="icon-btn">🍋</button>
+
   <input id="text" placeholder="写下一点此刻的想法..." />
-  <button onclick="send()">发送</button>
-  <button onclick="exportTxt()">导出</button>
+
+  <!-- 导出 -->
+  <button onclick="exportTxt()" class="icon-btn">📤</button>
+
+  <!-- 发送 -->
+  <button onclick="send()" class="icon-btn">➤</button>
 </div>
 
 <script>
@@ -109,7 +112,11 @@ function render() {
   messages.forEach(m => {
     const div = document.createElement("div");
     div.className = "msg " + (m.role === "A" ? "me1" : "me2");
-    div.innerText = m.text;
+
+    // 加一个很轻的 emoji 前缀（可删）
+    const prefix = m.role === "A" ? "🍋 " : "🤍 ";
+    div.innerText = prefix + m.text;
+
     chat.appendChild(div);
   });
 
@@ -130,7 +137,7 @@ function send() {
 function switchRole() {
   role = role === "A" ? "B" : "A";
   document.getElementById("roleBtn").innerText =
-    role === "A" ? "理性" : "感受";
+    role === "A" ? "🍋" : "🤍";
 }
 
 function exportTxt() {
