@@ -710,17 +710,13 @@ const filtered =
 messages.filter(m=>{
 
 const msgDate =
-formatDate(m.time)
+new Date(m.time)
 
 return (
 
-msgDate >=
-start.replace(/-/g,'.')
+msgDate >= startDate &&
 
-&&
-
-msgDate <=
-end.replace(/-/g,'.')
+msgDate <= endDate
 
 )
 
