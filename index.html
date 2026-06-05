@@ -706,16 +706,23 @@ endDate.setHours(
 999
 )
 
-const filtered=
+const filtered =
 messages.filter(m=>{
 
-const t=
-new Date(m.time)
+const msgDate =
+formatDate(m.time)
 
-return
+return (
 
-t>=startDate&&
-t<=endDate
+msgDate >=
+start.replace(/-/g,'.')
+
+&&
+
+msgDate <=
+end.replace(/-/g,'.')
+
+)
 
 })
 
