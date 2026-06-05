@@ -750,7 +750,7 @@ new Blob(
 [text],
 {
 type:
-"text/plain"
+"text/plain;charset=utf-8"
 }
 )
 
@@ -772,7 +772,17 @@ a.download=
 
 `-${end.replace(/-/g,'.')}.txt`
 
+document.body.appendChild(a)
+
 a.click()
+
+document.body.removeChild(a)
+
+setTimeout(()=>{
+
+URL.revokeObjectURL(url)
+
+},1000)
 
 }
 
