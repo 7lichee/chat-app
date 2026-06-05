@@ -694,11 +694,15 @@ if(
 !end
 )return
 
-const startDate=
-new Date(start)
+const startDate =
+new Date(
+start.replace(/-/g,"/")
+)
 
-const endDate=
-new Date(end)
+const endDate =
+new Date(
+end.replace(/-/g,"/")
+)
 
 endDate.setHours(
 23,
